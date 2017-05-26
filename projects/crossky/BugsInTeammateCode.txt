@@ -1,0 +1,35 @@
+Bug #1: Smithy card not removed from hand after it is played.
+
+Smithy had one bug that I found while running my random and unit tests. The Smithy card should have been discarded from the hand but it was not. Instead, the Smithy card stayed in the hand, for a total of 3 cards added to the hand instead of a net total of 2 cards. I found the bug by using a debugger built into xcode and watching the variables. Specifically, I watched the hand array to see which cards had been added to the hand, and which cards had been discarded. I noticed that 3 cards had been added, but the Smithy card had never been removed from the hand as should happen per business rules. There is simply an omission of the discardCard() function in playSmithy(). It could be inserted at the end of playSmithy().
+
+
+Bug#2: Segmentation fault when there is not at least 2 treasure cards in player’s piles.
+
+In the playAdventurer() function, there is an edge case bug where if there are no treasure cards in any of the player’s piles, a segmentation fault would occur. By using the debugger, one can see that since treasure is never drawn, the first while loop goes longer than expected. Thus, the player’s handCount variable reaches an unnatural and enexpected value. This, in turn, causes an invalid access of memory when handCount is used to access an index in the hand array. 
+The segfault occurs at this statement: 
+int cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];
+
+In order to avoid this bug, there should be a check at the beginning of the function to make sure that at least 2 treasure cards are available in the player’s hand and discard piles. 
+
+
+Bug#3: Village card added 2 cards to hand instead of 1.
+
+In the playVilllage() function, 2 cards were added to the player’s hand instead of an expected one. This bug was found by simply hand-tracing the code for playVillage(). It failed the test for only adding one card, and you can very easily see that drawCard() is called twice instead of once. 
+For example:
+//+2 Card
+    drawCard(currentPlayer, state);
+    drawCard(currentPlayer, state);
+Instead of:
+//+1 Card
+    drawCard(currentPlayer, state);
+
+
+Bug#4: Village card added 1 action to player’s option instead of expected 2.
+
+In playVillage(), the random test that checked to see that two actions were added to the player’s game state failed. Instead, only one action was added. This bug was found by handtracing the code and seeing: 
+//+1 Actions
+    state->numActions = state->numActions + 1;
+instead of:
+//+2 Actions
+    state->numActions = state->numActions + 2;
+I also watched the numAction variable in the debugger and verified that only one action was added instead of two.
